@@ -1,11 +1,11 @@
 import { Addon, Application } from 'denali';
-import ObjectionAdapter from './orm-adapters/objection';
+import * as knex from 'knex';
 
 export default class DenaliObjectionAddon extends Addon {
 
   async shutdown(application: Application) {
-    let Adapter = <ObjectionAdapter>application.container.lookup('orm-adapter:objection');
-    return Adapter.knex.destroy();
+    let knex = application.container.lookup<knex>('objection:knex');
+    await knex.destroy();
   }
 
 }

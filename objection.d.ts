@@ -15,6 +15,7 @@ declare module 'objection' {
     static tableName: string;
     static denaliModel: typeof DenaliModel;
     static knex(knex: knex): void;
+    static bindKnex(knex: knex): typeof Model;
     $id(): id;
     $id(id: id): void;
     $formatDatabaseJson(...args: any[]): object;

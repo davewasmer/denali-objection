@@ -13,19 +13,20 @@
   "main": "app/addon.js",
   "license": "MIT",
   "dependencies": {
-    "@types/knex": "^0.0.41",
+    "@types/knex": "^0.0.56",
     "bluebird": "^3.4.6",
-    "denali": "0.0.21",
-    "denali-cli": "0.0.x",
-    "denali-typescript": "^0.0.3",
+    "denali": "^0.0.29",
+    "denali-cli": "^0.0.12",
+    "denali-typescript": "^0.0.5",
     "in-publish": "^2.0.0",
-    "knex": "^0.12.7",
+    "knex": "^0.13.0",
     "lodash": "^4.16.4",
-    "objection": "^0.6.2"
+    "objection": "^0.8.4"
   },
   "devDependencies": {
-    "ava": "^0.17.0",
-    "pg": "^6.1.3"
+    "ava": "^0.20.0",
+    "pg": "^6.4.0",
+    "tslint": "^5.4.3"
   },
   "ava": {
     "plugins": [],

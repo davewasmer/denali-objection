@@ -1,38 +1,42 @@
-/// <reference path="../../objection.d.ts" />
 import {
-  forEach,
   mapKeys,
   camelCase,
   merge,
-  snakeCase
+  snakeCase,
+  startCase
 } from 'lodash';
 import * as assert from 'assert';
-import { Model as DenaliModel, ORMAdapter, RelationshipDescriptor } from 'denali';
-import { Model as ObjectionModel, transaction } from 'objection';
+import { inject, Model as DenaliBaseModel, ORMAdapter, RelationshipDescriptor } from 'denali';
+import { Model as ObjectionBaseModel, transaction } from 'objection';
 import { pluralize } from 'inflection';
 import * as knex from 'knex';
 
-type TableQuery = any;
-type RelationQuery = any;
-interface CustomTableQueryBuilder {
+export type TableQuery = any;
+export type RelationQuery = any;
+export interface CustomTableQueryBuilder {
   (query: TableQuery): TableQuery;
 }
-interface CustomRelationQueryBuilder {
+export interface CustomRelationQueryBuilder {
   (query: RelationQuery): RelationQuery;
 }
-interface FilterQuery {
-  [key: string]: any
+export interface FilterQuery {
+  [key: string]: any;
 }
 
-class Model extends DenaliModel {
+export class DenaliExtendedModel extends DenaliBaseModel {
   static tableName: string;
-  static objectionModel: typeof ObjectionModel;
+}
+
+declare module 'objection' {
+  interface Model {
+    denaliModel: DenaliExtendedModel;
+  }
 }
 
 export default class ObjectionAdapter extends ORMAdapter {
 
-  knex: knex;
-  ormModels: { [type: string]: typeof ObjectionModel };
+  ormModels: { [type: string]: typeof ObjectionBaseModel };
+  knex = inject<knex>('objection:knex');
 
   async all(type: string) {
     let ORMModel = this.ormModelForType(type);
@@ -45,7 +49,7 @@ export default class ObjectionAdapter extends ORMAdapter {
     return ORMModel.query().findById(id);
   }
 
-  async findOne(type: string, query: FilterQuery | CustomTableQueryBuilder) {
+  async queryOne(type: string, query: FilterQuery | CustomTableQueryBuilder) {
     let results = await this.query(type, query);
     return results[0] || null;
   }
@@ -69,32 +73,40 @@ export default class ObjectionAdapter extends ORMAdapter {
     return data;
   }
 
-  idFor(model: Model) {
-    if (model.record instanceof ObjectionModel) {
+  idFor(model: DenaliExtendedModel) {
+    if (model.record instanceof ObjectionBaseModel) {
       return model.record.$id();
     }
-    return model.record[(<typeof ObjectionModel>(<any>model.constructor).objectionModel).idColumn];
+    let DenaliModel = <typeof DenaliExtendedModel>model.constructor;
+    let type = DenaliModel.getType(this.container);
+    let ObjectionModel = this.ormModels[type];
+    let idColumn = ObjectionModel.idColumn;
+    if (typeof idColumn === 'string') {
+      return model.record[idColumn];
+    } else {
+      throw new Error('Compound ids are not yet supported by the denali-objection adapter');
+    }
   }
 
   setId() {
     throw new Error('Changing ids is not supported by denali-objection');
   }
 
-  getAttribute(model: Model, property: string) {
+  getAttribute(model: DenaliExtendedModel, property: string) {
     return model.record[property];
   }
 
-  setAttribute(model: Model, property: string, value: any) {
+  setAttribute(model: DenaliExtendedModel, property: string, value: any) {
     model.record[property] = value;
     return true;
   }
 
-  deleteAttribute(model: Model, property: string) {
+  deleteAttribute(model: DenaliExtendedModel, property: string) {
     delete model.record[property];
     return true;
   }
 
-  async getRelated(model: Model, relationship: string, descriptor: RelationshipDescriptor, query: FilterQuery | CustomRelationQueryBuilder) {
+  async getRelated(model: DenaliExtendedModel, relationship: string, descriptor: RelationshipDescriptor, query: FilterQuery | CustomRelationQueryBuilder) {
     let relatedQuery = model.record.$relatedQuery(relationship, this.testTransaction);
     if (query) {
       if (typeof query === 'object') {
@@ -106,32 +118,37 @@ export default class ObjectionAdapter extends ORMAdapter {
     return relatedQuery;
   }
 
-  async setRelated(model: Model, relationship: string, descriptor: RelationshipDescriptor, relatedModels: Model[]) {
+  async setRelated(model: DenaliExtendedModel, relationship: string, descriptor: RelationshipDescriptor, relatedModels: DenaliExtendedModel[]) {
     await model.record.$relatedQuery(relationship, this.testTransaction).unrelate();
     return model.record.$relatedQuery(relationship, this.testTransaction).relate(relatedModels.map((m) => m.id));
   }
 
-  async addRelated(model: Model, relationship: string, descriptor: RelationshipDescriptor, relatedModel: Model) {
+  async addRelated(model: DenaliExtendedModel, relationship: string, descriptor: RelationshipDescriptor, relatedModel: DenaliExtendedModel) {
     return model.record.$relatedQuery(relationship, this.testTransaction).relate(relatedModel.id);
   }
 
-  async removeRelated(model: Model, relationship: string, descriptor: RelationshipDescriptor, relatedModel: Model) {
+  async removeRelated(model: DenaliExtendedModel, relationship: string, descriptor: RelationshipDescriptor, relatedModel: DenaliExtendedModel) {
     let ORMModel = this.ormModelForType(model.type);
     return model.record.$relatedQuery(relationship, this.testTransaction).unrelate().where(ORMModel.idColumn, relatedModel.id);
   }
 
-  async saveRecord(model: Model) {
+  async saveRecord(model: DenaliExtendedModel) {
     let ORMModel = this.ormModelForType(model.type);
     if (typeof model.record.$id === 'function') {
-      return ORMModel.query().patchAndFetchById(model.record.$id(), model.record);
+      await ORMModel.query().patchAndFetchById(model.record.$id(), model.record);
+      return;
     }
     let result = await ORMModel.query().insert(model.record);
     model.record = result;
   }
 
-  async deleteRecord(model: Model) {
+  async deleteRecord(model: DenaliExtendedModel) {
     let ORMModel = this.ormModelForType(model.type);
-    return ORMModel.query().delete().where(ORMModel.idColumn, model.id);
+    if (Array.isArray(ORMModel.idColumn)) {
+      throw new Error('Compound ids are not yet supported by the denali-objection adapter');
+    }
+    await ORMModel.query().delete().where(ORMModel.idColumn, model.id);
+    return;
   }
 
   async startTestTransaction() {
@@ -140,7 +157,10 @@ export default class ObjectionAdapter extends ORMAdapter {
   }
 
   async rollbackTestTransaction() {
-    await this.testTransaction.rollback();
+    if (this.testTransaction) {
+      await this.testTransaction.rollback();
+      delete this.testTransaction;
+    }
   }
 
   ormModelForType(type: string) {
@@ -151,16 +171,17 @@ export default class ObjectionAdapter extends ORMAdapter {
     return ORMModel;
   }
 
-  async defineModels(models: typeof Model[]) {
+  async defineModels(models: typeof DenaliExtendedModel[]) {
     let adapter = this; // eslint-disable-line consistent-this
     this.ormModels = {};
     models.forEach((DenaliModel) => {
       if (!DenaliModel.hasOwnProperty('abstract')) {
-        class ORMModel extends ObjectionModel {
-          static tableName = DenaliModel.tableName || pluralize(snakeCase(DenaliModel.type));
+        let type = DenaliModel.getType(this.container);
+        class ObjectionModel extends ObjectionBaseModel {
+          static tableName = DenaliModel.tableName || pluralize(snakeCase(type));
           static denaliModel = DenaliModel;
-          $formatDatabaseJson() {
-            let json = super.$formatDatabaseJson(...arguments);
+          $formatDatabaseJson(json: Object) {
+            json = super.$formatDatabaseJson(json);
             return adapter.serializeRecord(json);
           }
           $parseDatabaseJson(json: object) {
@@ -168,14 +189,16 @@ export default class ObjectionAdapter extends ORMAdapter {
             return super.$parseDatabaseJson(json);
           }
         }
-        DenaliModel.objectionModel = ORMModel;
-        this.ormModels[DenaliModel.type] = ORMModel;
+        Object.defineProperty(ObjectionModel, 'name', {
+          value: startCase(type) + 'ObjectionModel'
+        });
+        this.ormModels[type] = ObjectionModel.bindKnex(this.knex);
       }
     });
 
-    forEach(models, (DenaliModel, type) => {
-      if (!DenaliModel.abstract) {
-        let ORMModel = this.ormModels[type];
+    models.forEach((DenaliModel) => {
+      if (!DenaliModel.hasOwnProperty('abstract') || !DenaliModel.abstract) {
+        let ORMModel = this.ormModels[DenaliModel.getType(this.container)];
         ORMModel.relationMappings = this.generateRelationMappingsFor(DenaliModel);
       }
     });
@@ -201,12 +224,12 @@ export default class ObjectionAdapter extends ORMAdapter {
     return camelCase(key);
   }
 
-  generateRelationMappingsFor(DenaliModel: typeof Model) {
+  generateRelationMappingsFor(DenaliModel: typeof DenaliExtendedModel) {
     let mappings: { [key: string]: any } = {};
 
-    DenaliModel.eachRelationship((name, descriptor) => {
+    DenaliModel.mapRelationshipDescriptors((descriptor, name) => {
       let config = descriptor.options;
-      let ORMModel = this.ormModels[DenaliModel.type];
+      let ORMModel = this.ormModels[DenaliModel.getType(this.container)];
       let RelatedORMModel = this.ormModels[descriptor.type];
       let mapping = <any>{
         modelClass: RelatedORMModel
@@ -216,7 +239,7 @@ export default class ObjectionAdapter extends ORMAdapter {
 
         // Many to many
         if (config.manyToMany) {
-          mapping.relation = ObjectionModel.ManyToManyRelation;
+          mapping.relation = ObjectionBaseModel.ManyToManyRelation;
           mapping.join = {
             from: `${ ORMModel.tableName }.id`, // i.e. from: 'Post.id'
             to: `${ RelatedORMModel.tableName }.id`, // i.e. to: 'Tag.id'
@@ -231,13 +254,13 @@ export default class ObjectionAdapter extends ORMAdapter {
           } else {
             joinTable = `${ ORMModel.tableName }_${ RelatedORMModel.tableName }`;
           }
-          mapping.join.through.from = `${ joinTable }.${ camelCase(ORMModel.denaliModel.type) }Id`; // i.e. from: 'Post_Tag.postId'
-          mapping.join.through.to = `${ joinTable }.${ camelCase(RelatedORMModel.denaliModel.type) }Id`; // i.e. from: 'Post_Tag.tagId'
+          mapping.join.through.from = `${ joinTable }.${ camelCase(ORMModel.denaliModel.getType(this.container)) }Id`; // i.e. from: 'Post_Tag.postId'
+          mapping.join.through.to = `${ joinTable }.${ camelCase(RelatedORMModel.denaliModel.getType(this.container)) }Id`; // i.e. from: 'Post_Tag.tagId'
 
         // Has many
         } else {
-          let inverse = config.inverse || camelCase(DenaliModel.type);
-          mapping.relation = ObjectionModel.HasManyRelation;
+          let inverse = config.inverse || camelCase(DenaliModel.getType(this.container));
+          mapping.relation = ObjectionBaseModel.HasManyRelation;
           mapping.join = {
             from: `${ ORMModel.tableName }.id`, // i.e. from: 'Post.id'
             to: `${ RelatedORMModel.tableName }.${ inverse }Id` // i.e. to: 'Comment.postId'
@@ -246,7 +269,7 @@ export default class ObjectionAdapter extends ORMAdapter {
 
       // Belongs to
       } else {
-        mapping.relation = ObjectionModel.BelongsToOneRelation;
+        mapping.relation = ObjectionBaseModel.BelongsToOneRelation;
         mapping.join = {
           from: `${ ORMModel.tableName }.${ name }Id`, // i.e. from: 'Comment.postId'
           to: `${ RelatedORMModel.tableName }.id` // i.e. to: 'Post.id'
@@ -257,6 +280,8 @@ export default class ObjectionAdapter extends ORMAdapter {
       mappings[name] = merge(mapping, config.mapping);
     });
 
+    console.log(DenaliModel)
+    console.log(mappings)
     return mappings;
   }
 
