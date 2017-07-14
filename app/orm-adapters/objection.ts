@@ -35,7 +35,7 @@ declare module 'objection' {
 
 export default class ObjectionAdapter extends ORMAdapter {
 
-  ormModels: { [type: string]: typeof ObjectionBaseModel };
+  objectionModels: { [type: string]: typeof ObjectionBaseModel };
   knex = inject<knex>('objection:knex');
 
   async all(type: string) {
@@ -79,7 +79,7 @@ export default class ObjectionAdapter extends ORMAdapter {
     }
     let DenaliModel = <typeof DenaliExtendedModel>model.constructor;
     let type = DenaliModel.getType(this.container);
-    let ObjectionModel = this.ormModels[type];
+    let ObjectionModel = this.objectionModels[type];
     let idColumn = ObjectionModel.idColumn;
     if (typeof idColumn === 'string') {
       return model.record[idColumn];
@@ -164,7 +164,7 @@ export default class ObjectionAdapter extends ORMAdapter {
   }
 
   ormModelForType(type: string) {
-    let ORMModel = this.ormModels[type];
+    let ORMModel = this.objectionModels[type];
     if (this.testTransaction) {
       return ORMModel.bindTransaction(this.testTransaction);
     }
@@ -173,7 +173,7 @@ export default class ObjectionAdapter extends ORMAdapter {
 
   async defineModels(models: typeof DenaliExtendedModel[]) {
     let adapter = this; // eslint-disable-line consistent-this
-    this.ormModels = {};
+    this.objectionModels = {};
     models.forEach((DenaliModel) => {
       if (!DenaliModel.hasOwnProperty('abstract')) {
         let type = DenaliModel.getType(this.container);
@@ -192,16 +192,22 @@ export default class ObjectionAdapter extends ORMAdapter {
         Object.defineProperty(ObjectionModel, 'name', {
           value: startCase(type) + 'ObjectionModel'
         });
-        this.ormModels[type] = ObjectionModel.bindKnex(this.knex);
+        this.objectionModels[type] = ObjectionModel.bindKnex(this.knex);
       }
     });
 
     models.forEach((DenaliModel) => {
+      let type = DenaliModel.getType(this.container);
+      let ObjectionModel = this.objectionModels[type];
       if (!DenaliModel.hasOwnProperty('abstract') || !DenaliModel.abstract) {
-        let ORMModel = this.ormModels[DenaliModel.getType(this.container)];
-        ORMModel.relationMappings = this.generateRelationMappingsFor(DenaliModel);
+        ObjectionModel.relationMappings = this.generateRelationMappingsFor(DenaliModel);
       }
     });
+
+    // models.forEach((DenaliModel) => {
+    //   let type = DenaliModel.getType(this.container);
+    //   let ORMModel = this.objectionModels[type];
+    // });
   }
 
   serializeRecord(json: object) {
@@ -229,41 +235,58 @@ export default class ObjectionAdapter extends ORMAdapter {
 
     DenaliModel.mapRelationshipDescriptors((descriptor, name) => {
       let config = descriptor.options;
-      let ORMModel = this.ormModels[DenaliModel.getType(this.container)];
-      let RelatedORMModel = this.ormModels[descriptor.type];
+      let type = DenaliModel.getType(this.container);
+      let ObjectionModel = this.objectionModels[type];
+      let RelatedObjectionModel = this.objectionModels[descriptor.type];
+      assert(ObjectionModel, `Unable to find the corresponding Objection model for the Denali "${ type }" model`);
+      assert(RelatedObjectionModel, `Unable to find the corresponding Objection model for the Denali "${ descriptor.type }" model`);
       let mapping = <any>{
-        modelClass: RelatedORMModel
+        modelClass: RelatedObjectionModel
       };
 
       if (descriptor.mode === 'hasMany') {
 
         // Many to many
+        // movies: {
+        //   relation: Model.ManyToManyRelation,
+        //   modelClass: Movie,
+        //   join: {
+        //     from: 'Person.id',
+        //     through: {
+        //       // Person_Movie is the join table.
+        //       from: 'Person_Movie.personId',
+        //       to: 'Person_Movie.movieId'
+        //     },
+        //     to: 'Movie.id'
+        //   }
+        // }
         if (config.manyToMany) {
           mapping.relation = ObjectionBaseModel.ManyToManyRelation;
+          mapping.modelClass = RelatedObjectionModel;
           mapping.join = {
-            from: `${ ORMModel.tableName }.id`, // i.e. from: 'Post.id'
-            to: `${ RelatedORMModel.tableName }.id`, // i.e. to: 'Tag.id'
+            from: `${ ObjectionModel.tableName }.id`, // i.e. from: 'Post.id'
+            to: `${ RelatedObjectionModel.tableName }.id`, // i.e. to: 'Tag.id'
             through: {
               extra: config.manyToMany.extra
             }
           };
           let joinTable;
           if (config.manyToMany.model) {
-            mapping.join.through.model = this.ormModels[config.manyToMany.model];
-            joinTable = mapping.join.through.model.tableName;
+            mapping.join.through.modelClass = this.objectionModels[config.manyToMany.model];
+            joinTable = mapping.join.through.modelClass.tableName;
           } else {
-            joinTable = `${ ORMModel.tableName }_${ RelatedORMModel.tableName }`;
+            joinTable = `${ ObjectionModel.tableName }_${ RelatedObjectionModel.tableName }`;
           }
-          mapping.join.through.from = `${ joinTable }.${ camelCase(ORMModel.denaliModel.getType(this.container)) }Id`; // i.e. from: 'Post_Tag.postId'
-          mapping.join.through.to = `${ joinTable }.${ camelCase(RelatedORMModel.denaliModel.getType(this.container)) }Id`; // i.e. from: 'Post_Tag.tagId'
+          mapping.join.through.from = `${ joinTable }.${ camelCase(ObjectionModel.denaliModel.getType(this.container)) }Id`; // i.e. from: 'Post_Tag.postId'
+          mapping.join.through.to = `${ joinTable }.${ camelCase(RelatedObjectionModel.denaliModel.getType(this.container)) }Id`; // i.e. from: 'Post_Tag.tagId'
 
         // Has many
         } else {
           let inverse = config.inverse || camelCase(DenaliModel.getType(this.container));
           mapping.relation = ObjectionBaseModel.HasManyRelation;
           mapping.join = {
-            from: `${ ORMModel.tableName }.id`, // i.e. from: 'Post.id'
-            to: `${ RelatedORMModel.tableName }.${ inverse }Id` // i.e. to: 'Comment.postId'
+            from: `${ ObjectionModel.tableName }.id`, // i.e. from: 'Post.id'
+            to: `${ RelatedObjectionModel.tableName }.${ inverse }Id` // i.e. to: 'Comment.postId'
           };
         }
 
@@ -271,8 +294,8 @@ export default class ObjectionAdapter extends ORMAdapter {
       } else {
         mapping.relation = ObjectionBaseModel.BelongsToOneRelation;
         mapping.join = {
-          from: `${ ORMModel.tableName }.${ name }Id`, // i.e. from: 'Comment.postId'
-          to: `${ RelatedORMModel.tableName }.id` // i.e. to: 'Post.id'
+          from: `${ ObjectionModel.tableName }.${ name }Id`, // i.e. from: 'Comment.postId'
+          to: `${ RelatedObjectionModel.tableName }.id` // i.e. to: 'Post.id'
         };
       }
 
@@ -280,8 +303,6 @@ export default class ObjectionAdapter extends ORMAdapter {
       mappings[name] = merge(mapping, config.mapping);
     });
 
-    console.log(DenaliModel)
-    console.log(mappings)
     return mappings;
   }
 
