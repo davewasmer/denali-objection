@@ -1,12 +1,13 @@
 import {
   mapKeys,
+  mapValues,
   camelCase,
   merge,
   snakeCase,
-  startCase
+  chain
 } from 'lodash';
 import * as assert from 'assert';
-import { inject, Model as DenaliBaseModel, ORMAdapter, RelationshipDescriptor } from 'denali';
+import { Model as DenaliBaseModel, ORMAdapter, RelationshipDescriptor } from 'denali';
 import { Model as ObjectionBaseModel, transaction } from 'objection';
 import { pluralize } from 'inflection';
 import * as knex from 'knex';
@@ -36,7 +37,11 @@ declare module 'objection' {
 export default class ObjectionAdapter extends ORMAdapter {
 
   ormModels: { [type: string]: typeof ObjectionBaseModel };
-  knex = inject<knex>('objection:knex');
+  knex: knex;
+
+  init() {
+    this.knex = this.container.lookup('objection:knex');
+  }
 
   async all(type: string) {
     let ORMModel = this.ormModelForType(type);
@@ -180,6 +185,7 @@ export default class ObjectionAdapter extends ORMAdapter {
         class ObjectionModel extends ObjectionBaseModel {
           static tableName = DenaliModel.tableName || pluralize(snakeCase(type));
           static denaliModel = DenaliModel;
+          name = `${chain(type).startCase().replace(' ', '').value()}ObjectionModel`;
           $formatDatabaseJson(json: Object) {
             json = super.$formatDatabaseJson(json);
             return adapter.serializeRecord(json);
@@ -189,19 +195,26 @@ export default class ObjectionAdapter extends ORMAdapter {
             return super.$parseDatabaseJson(json);
           }
         }
+
         Object.defineProperty(ObjectionModel, 'name', {
-          value: startCase(type) + 'ObjectionModel'
+          value: `${chain(type).startCase().replace(' ', '').value()}ObjectionModel`
         });
-        this.ormModels[type] = ObjectionModel.bindKnex(this.knex);
+
+        this.ormModels[type] = ObjectionModel;
       }
     });
 
     models.forEach((DenaliModel) => {
       if (!DenaliModel.hasOwnProperty('abstract') || !DenaliModel.abstract) {
-        let ORMModel = this.ormModels[DenaliModel.getType(this.container)];
+        let type = DenaliModel.getType(this.container);
+        let ORMModel = this.ormModels[type];
         ORMModel.relationMappings = this.generateRelationMappingsFor(DenaliModel);
       }
     });
+
+    // We have to do this after all of the relationMappings are defined
+    // because when bindKnex is called it eagerly tries to set the relations on the model
+    this.ormModels = mapValues(this.ormModels, (ormModel) => ormModel.bindKnex(this.knex));
   }
 
   serializeRecord(json: object) {
@@ -241,8 +254,8 @@ export default class ObjectionAdapter extends ORMAdapter {
         if (config.manyToMany) {
           mapping.relation = ObjectionBaseModel.ManyToManyRelation;
           mapping.join = {
-            from: `${ ORMModel.tableName }.id`, // i.e. from: 'Post.id'
-            to: `${ RelatedORMModel.tableName }.id`, // i.e. to: 'Tag.id'
+            from: `${ORMModel.tableName}.id`, // i.e. from: 'Post.id'
+            to: `${RelatedORMModel.tableName}.id`, // i.e. to: 'Tag.id'
             through: {
               extra: config.manyToMany.extra
             }
@@ -252,27 +265,27 @@ export default class ObjectionAdapter extends ORMAdapter {
             mapping.join.through.model = this.ormModels[config.manyToMany.model];
             joinTable = mapping.join.through.model.tableName;
           } else {
-            joinTable = `${ ORMModel.tableName }_${ RelatedORMModel.tableName }`;
+            joinTable = `${ORMModel.tableName}_${RelatedORMModel.tableName}`;
           }
-          mapping.join.through.from = `${ joinTable }.${ camelCase(ORMModel.denaliModel.getType(this.container)) }Id`; // i.e. from: 'Post_Tag.postId'
-          mapping.join.through.to = `${ joinTable }.${ camelCase(RelatedORMModel.denaliModel.getType(this.container)) }Id`; // i.e. from: 'Post_Tag.tagId'
+          mapping.join.through.from = `${joinTable}.${camelCase(ORMModel.denaliModel.getType(this.container))}Id`; // i.e. from: 'Post_Tag.postId'
+          mapping.join.through.to = `${joinTable}.${camelCase(RelatedORMModel.denaliModel.getType(this.container))}Id`; // i.e. from: 'Post_Tag.tagId'
 
-        // Has many
+          // Has many
         } else {
           let inverse = config.inverse || camelCase(DenaliModel.getType(this.container));
           mapping.relation = ObjectionBaseModel.HasManyRelation;
           mapping.join = {
-            from: `${ ORMModel.tableName }.id`, // i.e. from: 'Post.id'
-            to: `${ RelatedORMModel.tableName }.${ inverse }Id` // i.e. to: 'Comment.postId'
+            from: `${ORMModel.tableName}.id`, // i.e. from: 'Post.id'
+            to: `${RelatedORMModel.tableName}.${inverse}Id` // i.e. to: 'Comment.postId'
           };
         }
 
-      // Belongs to
+        // Belongs to
       } else {
         mapping.relation = ObjectionBaseModel.BelongsToOneRelation;
         mapping.join = {
-          from: `${ ORMModel.tableName }.${ name }Id`, // i.e. from: 'Comment.postId'
-          to: `${ RelatedORMModel.tableName }.id` // i.e. to: 'Post.id'
+          from: `${ORMModel.tableName}.${name}Id`, // i.e. from: 'Comment.postId'
+          to: `${RelatedORMModel.tableName}.id` // i.e. to: 'Post.id'
         };
       }
 
@@ -280,9 +293,6 @@ export default class ObjectionAdapter extends ORMAdapter {
       mappings[name] = merge(mapping, config.mapping);
     });
 
-    console.log(DenaliModel)
-    console.log(mappings)
     return mappings;
   }
-
 }
