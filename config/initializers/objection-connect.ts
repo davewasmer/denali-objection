@@ -7,6 +7,9 @@ export default {
   before: 'define-orm-models',
   async initialize(application: Application) {
     assert(application.config.database && application.config.database.client, 'Looks like you are missing database configuration. Add it to config.database - see the knex docs for configuration details: http://knexjs.org/#Installation-client');
-    application.container.register('objection:knex', Knex(application.config.database));
+    application.container.register('objection:knex', Knex(application.config.database), {
+      singleton: false,
+      instantiate: false
+    });
   }
 };

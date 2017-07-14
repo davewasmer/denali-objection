@@ -3,7 +3,7 @@ import {
   camelCase,
   merge,
   snakeCase,
-  startCase
+  chain
 } from 'lodash';
 import * as assert from 'assert';
 import { inject, Model as DenaliBaseModel, ORMAdapter, RelationshipDescriptor } from 'denali';
@@ -180,6 +180,7 @@ export default class ObjectionAdapter extends ORMAdapter {
         class ObjectionModel extends ObjectionBaseModel {
           static tableName = DenaliModel.tableName || pluralize(snakeCase(type));
           static denaliModel = DenaliModel;
+          name = `${chain(type).startCase().replace(' ', '').value()}ObjectionModel`;
           $formatDatabaseJson(json: Object) {
             json = super.$formatDatabaseJson(json);
             return adapter.serializeRecord(json);
@@ -189,8 +190,9 @@ export default class ObjectionAdapter extends ORMAdapter {
             return super.$parseDatabaseJson(json);
           }
         }
+
         Object.defineProperty(ObjectionModel, 'name', {
-          value: startCase(type) + 'ObjectionModel'
+          value: `${chain(type).startCase().replace(' ', '').value()}ObjectionModel`
         });
         this.objectionModels[type] = ObjectionModel.bindKnex(this.knex);
       }
@@ -280,7 +282,7 @@ export default class ObjectionAdapter extends ORMAdapter {
           mapping.join.through.from = `${ joinTable }.${ camelCase(ObjectionModel.denaliModel.getType(this.container)) }Id`; // i.e. from: 'Post_Tag.postId'
           mapping.join.through.to = `${ joinTable }.${ camelCase(RelatedObjectionModel.denaliModel.getType(this.container)) }Id`; // i.e. from: 'Post_Tag.tagId'
 
-        // Has many
+          // Has many
         } else {
           let inverse = config.inverse || camelCase(DenaliModel.getType(this.container));
           mapping.relation = ObjectionBaseModel.HasManyRelation;
@@ -290,7 +292,7 @@ export default class ObjectionAdapter extends ORMAdapter {
           };
         }
 
-      // Belongs to
+        // Belongs to
       } else {
         mapping.relation = ObjectionBaseModel.BelongsToOneRelation;
         mapping.join = {
@@ -305,5 +307,4 @@ export default class ObjectionAdapter extends ORMAdapter {
 
     return mappings;
   }
-
 }
