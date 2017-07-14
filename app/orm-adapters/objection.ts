@@ -123,9 +123,11 @@ export default class ObjectionAdapter extends ORMAdapter {
     return relatedQuery;
   }
 
-  async setRelated(model: DenaliExtendedModel, relationship: string, descriptor: RelationshipDescriptor, relatedModels: DenaliExtendedModel[]) {
+  async setRelated(model: DenaliExtendedModel, relationship: string, descriptor: RelationshipDescriptor, relatedModels: DenaliExtendedModel | DenaliExtendedModel[]) {
     await model.record.$relatedQuery(relationship, this.testTransaction).unrelate();
-    return model.record.$relatedQuery(relationship, this.testTransaction).relate(relatedModels.map((m) => m.id));
+
+    let related = Array.isArray(relatedModels) ? relatedModels.map((relatedModel) => relatedModel.id) : relatedModels.id;
+    return model.record.$relatedQuery(relationship, this.testTransaction).relate(related);
   }
 
   async addRelated(model: DenaliExtendedModel, relationship: string, descriptor: RelationshipDescriptor, relatedModel: DenaliExtendedModel) {

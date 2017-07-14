@@ -98,7 +98,8 @@ class ObjectionAdapter extends denali_1.ORMAdapter {
     setRelated(model, relationship, descriptor, relatedModels) {
         return tslib_1.__awaiter(this, void 0, void 0, function* () {
             yield model.record.$relatedQuery(relationship, this.testTransaction).unrelate();
-            return model.record.$relatedQuery(relationship, this.testTransaction).relate(relatedModels.map((m) => m.id));
+            let related = Array.isArray(relatedModels) ? relatedModels.map((relatedModel) => relatedModel.id) : relatedModels.id;
+            return model.record.$relatedQuery(relationship, this.testTransaction).relate(related);
         });
     }
     addRelated(model, relationship, descriptor, relatedModel) {
