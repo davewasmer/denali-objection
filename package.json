@@ -24,9 +24,9 @@
     "objection": "^0.8.4"
   },
   "devDependencies": {
-    "ava": "^0.20.0",
+    "ava": "^0.21.0",
     "pg": "^6.4.0",
-    "tslint": "^5.4.3"
+    "tslint": "^5.5.0"
   },
   "ava": {
     "plugins": [],
