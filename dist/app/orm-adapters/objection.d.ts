@@ -40,7 +40,7 @@ export default class ObjectionAdapter extends ORMAdapter {
     setAttribute(model: DenaliExtendedModel, property: string, value: any): boolean;
     deleteAttribute(model: DenaliExtendedModel, property: string): boolean;
     getRelated(model: DenaliExtendedModel, relationship: string, descriptor: RelationshipDescriptor, query: FilterQuery | CustomRelationQueryBuilder): Promise<any>;
-    setRelated(model: DenaliExtendedModel, relationship: string, descriptor: RelationshipDescriptor, relatedModels: DenaliExtendedModel[]): Promise<any>;
+    setRelated(model: DenaliExtendedModel, relationship: string, descriptor: RelationshipDescriptor, relatedModels: DenaliExtendedModel | DenaliExtendedModel[]): Promise<any>;
     addRelated(model: DenaliExtendedModel, relationship: string, descriptor: RelationshipDescriptor, relatedModel: DenaliExtendedModel): Promise<any>;
     removeRelated(model: DenaliExtendedModel, relationship: string, descriptor: RelationshipDescriptor, relatedModel: DenaliExtendedModel): Promise<any>;
     saveRecord(model: DenaliExtendedModel): Promise<void>;
