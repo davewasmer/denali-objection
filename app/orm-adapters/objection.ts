@@ -180,7 +180,6 @@ export default class ObjectionAdapter extends ORMAdapter {
         class ObjectionModel extends ObjectionBaseModel {
           static tableName = DenaliModel.tableName || pluralize(snakeCase(type));
           static denaliModel = DenaliModel;
-          name = `${chain(type).startCase().replace(' ', '').value()}ObjectionModel`;
           $formatDatabaseJson(json: Object) {
             json = super.$formatDatabaseJson(json);
             return adapter.serializeRecord(json);

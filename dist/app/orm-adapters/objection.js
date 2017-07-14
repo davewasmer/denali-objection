@@ -162,10 +162,6 @@ class ObjectionAdapter extends denali_1.ORMAdapter {
                 if (!DenaliModel.hasOwnProperty('abstract')) {
                     let type = DenaliModel.getType(this.container);
                     class ObjectionModel extends objection_1.Model {
-                        constructor() {
-                            super(...arguments);
-                            this.name = `${lodash_1.chain(type).startCase().replace(' ', '').value()}ObjectionModel`;
-                        }
                         $formatDatabaseJson(json) {
                             json = super.$formatDatabaseJson(json);
                             return adapter.serializeRecord(json);
