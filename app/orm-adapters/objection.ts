@@ -284,8 +284,8 @@ export default class ObjectionAdapter extends ORMAdapter {
           } else {
             joinTable = `${ ObjectionModel.tableName }_${ RelatedObjectionModel.tableName }`;
           }
-          mapping.join.through.from = `${ joinTable }.${ camelCase(ObjectionModel.denaliModel.getType(this.container)) }Id`; // i.e. from: 'Post_Tag.postId'
-          mapping.join.through.to = `${ joinTable }.${ camelCase(RelatedObjectionModel.denaliModel.getType(this.container)) }Id`; // i.e. from: 'Post_Tag.tagId'
+          mapping.join.through.from = `${ joinTable }.${this.columnNameForForeignKey(ObjectionModel)}`; // i.e. from: 'Post_Tag.postId'
+          mapping.join.through.to = `${ joinTable }.${ this.columnNameForForeignKey(RelatedObjectionModel)}`; // i.e. from: 'Post_Tag.tagId'
 
           // Has many
         } else {
@@ -293,7 +293,7 @@ export default class ObjectionAdapter extends ORMAdapter {
           mapping.relation = ObjectionBaseModel.HasManyRelation;
           mapping.join = {
             from: `${ ObjectionModel.tableName }.id`, // i.e. from: 'Post.id'
-            to: `${ RelatedObjectionModel.tableName }.${ inverse }Id` // i.e. to: 'Comment.postId'
+            to: `${ RelatedObjectionModel.tableName }.${ inverse }_id` // i.e. to: 'Comment.postId'
           };
         }
 
@@ -301,7 +301,7 @@ export default class ObjectionAdapter extends ORMAdapter {
       } else {
         mapping.relation = ObjectionBaseModel.BelongsToOneRelation;
         mapping.join = {
-          from: `${ ObjectionModel.tableName }.${ name }Id`, // i.e. from: 'Comment.postId'
+          from: `${ ObjectionModel.tableName }.${ name }_id`, // i.e. from: 'Comment.postId'
           to: `${ RelatedObjectionModel.tableName }.id` // i.e. to: 'Post.id'
         };
       }
@@ -311,5 +311,9 @@ export default class ObjectionAdapter extends ORMAdapter {
     });
 
     return mappings;
+  }
+
+  columnNameForForeignKey(objectionModel: typeof ObjectionBaseModel): string {
+    return `${ camelCase(objectionModel.denaliModel.getType(this.container)) }_id`;
   }
 }
