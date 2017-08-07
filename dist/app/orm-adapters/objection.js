@@ -175,7 +175,7 @@ class ObjectionAdapter extends denali_1.ORMAdapter {
                     ObjectionModel.tableName = DenaliModel.tableName || inflection_1.pluralize(lodash_1.snakeCase(type));
                     ObjectionModel.denaliModel = DenaliModel;
                     Object.defineProperty(ObjectionModel, 'name', {
-                        value: `${lodash_1.startCase(type).replace(' ', '').value()}ObjectionModel`
+                        value: `${lodash_1.startCase(type).replace(' ', '')}ObjectionModel`
                     });
                     this.objectionModels[type] = ObjectionModel;
                 }
