@@ -1,10 +1,10 @@
 import {
   mapKeys,
   mapValues,
-  camelCase,
   merge,
-  snakeCase,
-  chain
+  startCase,
+  camelCase,
+  snakeCase
 } from 'lodash';
 import * as assert from 'assert';
 import { Model as DenaliBaseModel, ORMAdapter, RelationshipDescriptor } from 'denali';
@@ -197,7 +197,7 @@ export default class ObjectionAdapter extends ORMAdapter {
         }
 
         Object.defineProperty(ObjectionModel, 'name', {
-          value: `${chain(type).startCase().replace(' ', '').value()}ObjectionModel`
+          value: `${startCase(type).replace(' ', '').value()}ObjectionModel`
         });
 
         this.objectionModels[type] = ObjectionModel;
@@ -245,8 +245,8 @@ export default class ObjectionAdapter extends ORMAdapter {
       let type = DenaliModel.getType(this.container);
       let ObjectionModel = this.objectionModels[type];
       let RelatedObjectionModel = this.objectionModels[descriptor.type];
-      assert(ObjectionModel, `Unable to find the corresponding Objection model for the Denali "${ type }" model`);
-      assert(RelatedObjectionModel, `Unable to find the corresponding Objection model for the Denali "${ descriptor.type }" model`);
+      assert(ObjectionModel, `Unable to find the corresponding Objection model for the Denali "${type}" model`);
+      assert(RelatedObjectionModel, `Unable to find the corresponding Objection model for the Denali "${descriptor.type}" model`);
       let mapping = <any>{
         modelClass: RelatedObjectionModel
       };
@@ -271,8 +271,8 @@ export default class ObjectionAdapter extends ORMAdapter {
           mapping.relation = ObjectionBaseModel.ManyToManyRelation;
           mapping.modelClass = RelatedObjectionModel;
           mapping.join = {
-            from: `${ ObjectionModel.tableName }.id`, // i.e. from: 'Post.id'
-            to: `${ RelatedObjectionModel.tableName }.id`, // i.e. to: 'Tag.id'
+            from: `${ObjectionModel.tableName}.id`, // i.e. from: 'Post.id'
+            to: `${RelatedObjectionModel.tableName}.id`, // i.e. to: 'Tag.id'
             through: {
               extra: config.manyToMany.extra
             }
@@ -282,18 +282,18 @@ export default class ObjectionAdapter extends ORMAdapter {
             mapping.join.through.modelClass = this.objectionModels[config.manyToMany.model];
             joinTable = mapping.join.through.modelClass.tableName;
           } else {
-            joinTable = `${ ObjectionModel.tableName }_${ RelatedObjectionModel.tableName }`;
+            joinTable = `${ObjectionModel.tableName}_${RelatedObjectionModel.tableName}`;
           }
-          mapping.join.through.from = `${ joinTable }.${this.columnNameForForeignKey(ObjectionModel)}`; // i.e. from: 'Post_Tag.postId'
-          mapping.join.through.to = `${ joinTable }.${ this.columnNameForForeignKey(RelatedObjectionModel)}`; // i.e. from: 'Post_Tag.tagId'
+          mapping.join.through.from = `${joinTable}.${this.columnNameForForeignKey(ObjectionModel)}`; // i.e. from: 'Post_Tag.postId'
+          mapping.join.through.to = `${joinTable}.${this.columnNameForForeignKey(RelatedObjectionModel)}`; // i.e. from: 'Post_Tag.tagId'
 
           // Has many
         } else {
-          let inverse = config.inverse || camelCase(DenaliModel.getType(this.container));
+          let inverse = config.inverse || snakeCase(DenaliModel.getType(this.container));
           mapping.relation = ObjectionBaseModel.HasManyRelation;
           mapping.join = {
-            from: `${ ObjectionModel.tableName }.id`, // i.e. from: 'Post.id'
-            to: `${ RelatedObjectionModel.tableName }.${ inverse }_id` // i.e. to: 'Comment.postId'
+            from: `${ObjectionModel.tableName}.id`, // i.e. from: 'Post.id'
+            to: `${RelatedObjectionModel.tableName}.${inverse}_id` // i.e. to: 'Comment.postId'
           };
         }
 
@@ -301,8 +301,8 @@ export default class ObjectionAdapter extends ORMAdapter {
       } else {
         mapping.relation = ObjectionBaseModel.BelongsToOneRelation;
         mapping.join = {
-          from: `${ ObjectionModel.tableName }.${ name }_id`, // i.e. from: 'Comment.postId'
-          to: `${ RelatedObjectionModel.tableName }.id` // i.e. to: 'Post.id'
+          from: `${ObjectionModel.tableName}.${name}_id`, // i.e. from: 'Comment.postId'
+          to: `${RelatedObjectionModel.tableName}.id` // i.e. to: 'Post.id'
         };
       }
 
@@ -314,6 +314,6 @@ export default class ObjectionAdapter extends ORMAdapter {
   }
 
   columnNameForForeignKey(objectionModel: typeof ObjectionBaseModel): string {
-    return `${ camelCase(objectionModel.denaliModel.getType(this.container)) }_id`;
+    return `${snakeCase(objectionModel.denaliModel.getType(this.container))}_id`;
   }
 }
