@@ -197,7 +197,7 @@ export default class ObjectionAdapter extends ORMAdapter {
         }
 
         Object.defineProperty(ObjectionModel, 'name', {
-          value: `${startCase(type).replace(' ', '').value()}ObjectionModel`
+          value: `${startCase(type).replace(' ', '')}ObjectionModel`
         });
 
         this.objectionModels[type] = ObjectionModel;
