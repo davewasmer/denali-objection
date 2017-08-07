@@ -262,7 +262,7 @@ class ObjectionAdapter extends denali_1.ORMAdapter {
                     mapping.relation = objection_1.Model.HasManyRelation;
                     mapping.join = {
                         from: `${ObjectionModel.tableName}.id`,
-                        to: `${RelatedObjectionModel.tableName}.${inverse}_id` // i.e. to: 'Comment.postId'
+                        to: `${RelatedObjectionModel.tableName}.${lodash_1.snakeCase(inverse)}_id` // i.e. to: 'Comment.postId'
                     };
                 }
                 // Belongs to
@@ -270,7 +270,7 @@ class ObjectionAdapter extends denali_1.ORMAdapter {
             else {
                 mapping.relation = objection_1.Model.BelongsToOneRelation;
                 mapping.join = {
-                    from: `${ObjectionModel.tableName}.${name}_id`,
+                    from: `${ObjectionModel.tableName}.${lodash_1.snakeCase(name)}_id`,
                     to: `${RelatedObjectionModel.tableName}.id` // i.e. to: 'Post.id'
                 };
             }

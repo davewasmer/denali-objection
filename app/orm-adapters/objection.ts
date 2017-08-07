@@ -293,7 +293,7 @@ export default class ObjectionAdapter extends ORMAdapter {
           mapping.relation = ObjectionBaseModel.HasManyRelation;
           mapping.join = {
             from: `${ObjectionModel.tableName}.id`, // i.e. from: 'Post.id'
-            to: `${RelatedObjectionModel.tableName}.${inverse}_id` // i.e. to: 'Comment.postId'
+            to: `${RelatedObjectionModel.tableName}.${snakeCase(inverse)}_id` // i.e. to: 'Comment.postId'
           };
         }
 
@@ -301,7 +301,7 @@ export default class ObjectionAdapter extends ORMAdapter {
       } else {
         mapping.relation = ObjectionBaseModel.BelongsToOneRelation;
         mapping.join = {
-          from: `${ObjectionModel.tableName}.${name}_id`, // i.e. from: 'Comment.postId'
+          from: `${ObjectionModel.tableName}.${snakeCase(name)}_id`, // i.e. from: 'Comment.postId'
           to: `${RelatedObjectionModel.tableName}.id` // i.e. to: 'Post.id'
         };
       }
