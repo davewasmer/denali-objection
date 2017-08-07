@@ -1,0 +1,34 @@
+{
+  "name": "denali-objection",
+  "version": "0.0.2",
+  "scripts": {
+    "build": "denali build"
+  },
+  "keywords": [
+    "denali",
+    "denali-addon",
+    "addon"
+  ],
+  "main": "app/addon.js",
+  "license": "MIT",
+  "dependencies": {
+    "@types/knex": "^0.0.56",
+    "bluebird": "^3.4.6",
+    "denali": "^0.0.30",
+    "denali-cli": "^0.0.12",
+    "denali-typescript": "^0.0.5",
+    "in-publish": "^2.0.0",
+    "knex": "^0.13.0",
+    "lodash": "^4.16.4",
+    "objection": "^0.8.4"
+  },
+  "devDependencies": {
+    "ava": "^0.21.0",
+    "pg": "^6.4.0",
+    "tslint": "^5.5.0"
+  },
+  "ava": {
+    "plugins": [],
+    "presets": []
+  }
+}
