@@ -3,30 +3,34 @@
   "version": "0.0.2",
   "scripts": {
     "build": "denali build",
-    "prepublish": "in-publish && echo \"Use 'denali publish' instead.\" && exit 1 || not-in-publish"
+    "prepublishOnly": "npm run build"
   },
   "keywords": [
     "denali",
     "denali-addon",
     "addon"
   ],
-  "main": "app/addon.js",
+  "main": "lib/index.js",
+  "mainDir": "dist",
+  "types": "dist/lib/index.d.ts",
   "license": "MIT",
   "dependencies": {
-    "@types/knex": "^0.0.56",
+    "@types/knex": "^0.0.57",
     "bluebird": "^3.4.6",
     "denali": "^0.0.30",
     "denali-cli": "^0.0.12",
-    "denali-typescript": "^0.0.5",
-    "in-publish": "^2.0.0",
+    "denali-typescript": "^0.0.6",
     "knex": "^0.13.0",
     "lodash": "^4.16.4",
-    "objection": "^0.8.4"
+    "objection": "^0.8.7",
+    "typescript": "^2.4.2"
   },
   "devDependencies": {
-    "ava": "^0.21.0",
-    "pg": "^6.4.0",
-    "tslint": "^5.5.0"
+    "@types/tmp": "^0.0.33",
+    "ava": "^0.22.0",
+    "sqlite3": "^3.1.9",
+    "tmp": "^0.0.33",
+    "tslint": "^5.6.0"
   },
   "ava": {
     "plugins": [],

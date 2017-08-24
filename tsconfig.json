@@ -12,7 +12,10 @@
       "inlineSources": false,
       "baseUrl": ".",
       "skipLibCheck": true,
-      "noUnusedLocals": true
+      "noUnusedLocals": true,
+      "paths": {
+        "denali-objection": [ "lib/index.ts" ]
+      }
   },
   "exclude": [ "blueprints/*/files/**", "dist", "tmp"]
 }
