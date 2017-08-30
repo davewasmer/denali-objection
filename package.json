@@ -23,6 +23,7 @@
     "knex": "^0.13.0",
     "lodash": "^4.16.4",
     "objection": "^0.8.7",
+    "standard-version": "^4.2.0",
     "typescript": "^2.4.2"
   },
   "devDependencies": {
