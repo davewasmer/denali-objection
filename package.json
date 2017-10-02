@@ -17,7 +17,7 @@
     "bluebird": "^3.4.6",
     "denali": "^0.0.33",
     "denali-cli": "^0.0.16",
-    "denali-typescript": "seawatts/denali-typescript#master",
+    "denali-typescript": "^0.0.8",
     "in-publish": "^2.0.0",
     "knex": "^0.13.0",
     "lodash": "^4.16.4",
