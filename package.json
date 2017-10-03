@@ -10,9 +10,9 @@
     "denali-addon",
     "addon"
   ],
-  "main": "app/addon.js",
+  "main": "lib/index.js",
   "mainDir": "dist",
-  "types": "dist/app/addon.d.ts",
+  "types": "dist/lib/index.d.ts",
   "license": "MIT",
   "dependencies": {
     "@types/knex": "^0.0.57",
