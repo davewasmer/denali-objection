@@ -1,3 +1,4 @@
+import 'main-dir';
 import { Addon, Application } from 'denali';
 import * as knex from 'knex';
 
