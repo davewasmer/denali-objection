@@ -11,6 +11,7 @@
     "addon"
   ],
   "main": "app/addon.js",
+  "mainDir": "dist",
   "license": "MIT",
   "dependencies": {
     "@types/knex": "^0.0.56",
