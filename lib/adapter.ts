@@ -192,6 +192,11 @@ export default class ObjectionAdapter extends ORMAdapter {
     return camelCase(key);
   }
 
+  foreignKeyForRelationship(model: DenaliModel): string {
+    let type = model.getType(this.container);
+    return `${snakeCase(type)}_id`;
+  }
+
   async defineModels(models: (typeof ExtendedDenaliModel | typeof DenaliModel)[]) {
     defineModels(this, this.container, models);
   }

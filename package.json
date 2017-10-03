@@ -17,9 +17,10 @@
   "dependencies": {
     "@types/knex": "^0.0.57",
     "bluebird": "^3.4.6",
-    "denali": "^0.0.30",
-    "denali-cli": "^0.0.12",
-    "denali-typescript": "^0.0.6",
+    "denali": "seawatts/denali#master",
+    "denali-cli": "^0.0.17",
+    "denali-typescript": "^0.0.8",
+    "in-publish": "^2.0.0",
     "knex": "^0.13.0",
     "lodash": "^4.16.4",
     "objection": "^0.8.7",
@@ -27,12 +28,9 @@
     "typescript": "^2.4.2"
   },
   "devDependencies": {
-    "@types/tmp": "^0.0.33",
-    "ava": "^0.22.0",
-    "pg": "^7.2.0",
-    "sqlite3": "^3.1.9",
-    "tmp": "^0.0.33",
-    "tslint": "^5.6.0"
+    "ava": "^0.21.0",
+    "pg": "^6.4.0",
+    "tslint": "^5.5.0"
   },
   "ava": {
     "plugins": [],

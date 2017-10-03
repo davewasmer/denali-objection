@@ -13,7 +13,6 @@ import generateManyToManyRelationMapping from './relation-mappings/many-to-many'
 import generateHasManyRelationMapping from './relation-mappings/has-many';
 import generateHasOneRelationMapping from './relation-mappings/has-one';
 
-
 export default function defineModels(adapter: ObjectionAdapter, container: Container, models: (typeof ExtendedDenaliModel | typeof BaseDenaliModel)[]) {
   let objectionModels = adapter.objectionModels;
 
@@ -48,7 +47,7 @@ export default function defineModels(adapter: ObjectionAdapter, container: Conta
   models.forEach((model) => {
     let type = model.getType(container);
     let ObjectionModel = objectionModels[type];
-    ObjectionModel.relationMappings = generateRelationMappingsFor(<typeof ExtendedDenaliModel>model, objectionModels, container);
+    ObjectionModel.relationMappings = generateRelationMappingsFor(adapter, <typeof ExtendedDenaliModel>model, objectionModels, container);
   });
 
   models.forEach((model) => {
@@ -58,18 +57,18 @@ export default function defineModels(adapter: ObjectionAdapter, container: Conta
   });
 }
 
-function generateRelationMappingsFor(model: typeof ExtendedDenaliModel, objectionModels: Dict<typeof ExtendedObjectionModel>, container: Container) {
+function generateRelationMappingsFor(adapter: ObjectionAdapter, model: typeof ExtendedDenaliModel, objectionModels: Dict<typeof ExtendedObjectionModel>, container: Container) {
   let relationMappings: RelationMappings = {};
 
   model.mapRelationshipDescriptors((descriptor, name) => {
     if (descriptor.mode === 'hasMany') {
       if (descriptor.options.manyToMany) {
-        relationMappings[name] = generateManyToManyRelationMapping(objectionModels, container, model, name, descriptor);
+        relationMappings[name] = generateManyToManyRelationMapping(adapter, objectionModels, container, model, name, descriptor);
       } else {
-        relationMappings[name] = generateHasManyRelationMapping(objectionModels, container, model, name, descriptor);
+        relationMappings[name] = generateHasManyRelationMapping(adapter, objectionModels, container, model, name, descriptor);
       }
     } else {
-      relationMappings[name] = generateHasOneRelationMapping(objectionModels, container, model, name, descriptor);
+      relationMappings[name] = generateHasOneRelationMapping(adapter, objectionModels, container, model, name, descriptor);
     }
   });
 
