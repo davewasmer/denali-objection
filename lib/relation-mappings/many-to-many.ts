@@ -47,8 +47,8 @@ export default function generateManyToManyRelationMapping(
     options.foreignKeyForRelationship :
     adapter.foreignKeyForRelationship;
 
-  mapping.join.through.from = `${joinTable}.${foreignKeyForRelationship(model)}`; // i.e. from: 'Post_Tag.postId'
-  mapping.join.through.to = `${joinTable}.${foreignKeyForRelationship(RelatedObjectionModel.denaliModel)}`; // i.e. from: 'Post_Tag.postId'
+  mapping.join.through.from = `${joinTable}.${foreignKeyForRelationship.call(adapter, model)}`; // i.e. from: 'Post_Tag.postId'
+  mapping.join.through.to = `${joinTable}.${foreignKeyForRelationship.call(adapter, RelatedObjectionModel.denaliModel)}`; // i.e. from: 'Post_Tag.postId'
 
   return mapping;
 }
