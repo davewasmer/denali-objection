@@ -163,6 +163,12 @@ export default class ObjectionAdapter extends ORMAdapter {
     }
   }
 
+  foreignKeyForRelationship(model: DenaliModel): string {
+    let type = model.getType(this.container);
+
+    return `${camelCase(type)}Id`;
+  }
+
   objectionModelForType(type: string): typeof ExtendedObjectionModel {
     let AdapterObjectionModel = this.objectionModels[type];
     assert(AdapterObjectionModel, `Unable to locate the objection.js model class for the ${ type } type. Available objection models: ${ Object.keys(this.objectionModels).join(', ') }`);
