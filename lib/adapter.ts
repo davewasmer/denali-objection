@@ -153,7 +153,7 @@ export default class ObjectionAdapter extends ORMAdapter {
 
   async startTestTransaction() {
     assert(this.knex, 'You tried to start a test transaction, but the database connection has not been established yet');
-    this.testTransaction = await transaction.start(this.knex);
+    this.testTransaction = await transaction.start(<knex>this.knex);
   }
 
   async rollbackTestTransaction() {
@@ -163,8 +163,8 @@ export default class ObjectionAdapter extends ORMAdapter {
     }
   }
 
-  foreignKeyForRelationship(model: DenaliModel): string {
-    let type = model.getType(this.container);
+  foreignKeyForRelationship(relationship: RelationshipDescriptor): string {
+    let type = relationship.type;
 
     return `${camelCase(type)}Id`;
   }
