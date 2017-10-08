@@ -4,7 +4,6 @@ import {
 } from 'lodash';
 import { pluralize } from 'inflection';
 import { Model as BaseDenaliModel, Container } from 'denali';
-import * as knex from 'knex';
 import ObjectionAdapter from './adapter';
 import ExtendedDenaliModel from './denali-model';
 import ExtendedObjectionModel from './objection-model';
@@ -55,7 +54,7 @@ export default function defineModels(adapter: ObjectionAdapter, container: Conta
   models.forEach((model) => {
     let type = model.getType(container);
     let ObjectionModel = objectionModels[type];
-    objectionModels[type] = ObjectionModel.bindKnex(<knex>adapter.knex);
+    objectionModels[type] = ObjectionModel.bindKnex(adapter.knex);
   });
 }
 

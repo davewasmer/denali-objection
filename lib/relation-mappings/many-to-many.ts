@@ -43,9 +43,7 @@ export default function generateManyToManyRelationMapping(
     joinTable = `${ ObjectionModel.tableName }_${ RelatedObjectionModel.tableName }`;
   }
 
-  let foreignKeyForRelationship = options.foreignKeyForRelationship && typeof options.foreignKeyForRelationship === 'function' ?
-    options.foreignKeyForRelationship :
-    adapter.foreignKeyForRelationship;
+  let foreignKeyForRelationship = options.foreignKeyForRelationship ? () => options.foreignKeyForRelationship : adapter.foreignKeyForRelationship;
 
   mapping.join.through.from = `${joinTable}.${foreignKeyForRelationship.call(adapter, model)}`; // i.e. from: 'Post_Tag.postId'
   mapping.join.through.to = `${joinTable}.${foreignKeyForRelationship.call(adapter, RelatedObjectionModel.denaliModel)}`; // i.e. from: 'Post_Tag.postId'
