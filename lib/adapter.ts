@@ -118,8 +118,15 @@ export default class ObjectionAdapter extends ORMAdapter {
   async setRelated(model: ExtendedDenaliModel, relationship: string, descriptor: RelationshipDescriptor, relatedModels: ExtendedDenaliModel | ExtendedDenaliModel[]) {
     await model.record.$relatedQuery(relationship, this.testTransaction).unrelate();
 
-    let related = Array.isArray(relatedModels) ? relatedModels.map((relatedModel) => relatedModel.id) : relatedModels.id;
-    assert(related.filter(Boolean).length === related.length, 'You must pass Model instances to `setRelated()`, but one or more of instances of null or undefined were supplied. Make sure you are actually passing Model instances in.');
+    let related;
+    if (Array.isArray(relatedModels)) {
+      related = relatedModels.map((relatedModel) => relatedModel.id);
+      assert(related.filter(Boolean).length === related.length, 'You must pass Model instances to `setRelated()`, but you passed in an array containing one or more of instances of null or undefined. Make sure you are actually passing Model instances in.');
+    } else {
+      related = relatedModels.id;
+      assert(related, 'You must pass a Model instance or array of Model instances to `setRelated()`, but you passed in null or undefined instead. Make sure you are actually passing Model instances in.');
+    }
+
     return model.record.$relatedQuery(relationship, this.testTransaction).relate(related);
   }
 
