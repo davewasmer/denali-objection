@@ -121,10 +121,10 @@ export default class ObjectionAdapter extends ORMAdapter {
     let related;
     if (Array.isArray(relatedModels)) {
       related = relatedModels.map((relatedModel) => relatedModel.id);
-      assert(related.filter(Boolean).length === related.length, 'You must pass Model instances to `setRelated()`, but one or more of instances of null or undefined were supplied. Make sure you are actually passing Model instances in.');
+      assert(related.filter(Boolean).length === related.length, 'You must pass Model instances to `setRelated()`, but you passed in an array containing one or more of instances of null or undefined. Make sure you are actually passing Model instances in.');
     } else {
       related = relatedModels.id;
-      assert(related, 'You must pass Model instance to `setRelated()`, but one instance of null or undefined were supplied. Make sure you are actually passing Model instance in.');
+      assert(related, 'You must pass a Model instance or array of Model instances to `setRelated()`, but you passed in null or undefined instead. Make sure you are actually passing Model instances in.');
     }
 
     return model.record.$relatedQuery(relationship, this.testTransaction).relate(related);
