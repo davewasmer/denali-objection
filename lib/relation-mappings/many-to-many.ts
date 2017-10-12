@@ -1,13 +1,14 @@
 import * as assert from 'assert';
 import { Dict } from '../utils';
-import { camelCase } from 'lodash';
 import { Model as BaseObjectionModel } from 'objection';
 import ExtendedDenaliModel from '../denali-model';
 import ExtendedObjectionModel from '../objection-model';
 import { RelationshipDescriptor, Container } from 'denali';
 import { RelationMapping, RelationJoin, RelationThrough } from 'objection';
+import ObjectionAdapter from '../adapter';
 
 export default function generateManyToManyRelationMapping(
+  adapter: ObjectionAdapter,
   objectionModels: Dict<typeof ExtendedObjectionModel>,
   container: Container,
   model: typeof ExtendedDenaliModel,
@@ -18,7 +19,6 @@ export default function generateManyToManyRelationMapping(
   let options = descriptor.options;
   let ObjectionModel = objectionModels[type];
   let RelatedObjectionModel = objectionModels[descriptor.type];
-  let relatedType = RelatedObjectionModel.denaliModel.getType(container);
 
   assert(ObjectionModel, `Unable to find the corresponding Objection model for the Denali "${ type }" model`);
   assert(RelatedObjectionModel, `Unable to find the corresponding Objection model for the Denali "${ descriptor.type }" model`);
@@ -43,8 +43,10 @@ export default function generateManyToManyRelationMapping(
     joinTable = `${ ObjectionModel.tableName }_${ RelatedObjectionModel.tableName }`;
   }
 
-  mapping.join.through.from = `${ joinTable }.${ camelCase(type) }Id`; // i.e. from: 'Post_Tag.postId'
-  mapping.join.through.to = `${ joinTable }.${ camelCase(relatedType) }Id`; // i.e. from: 'Post_Tag.tagId'
+  let foreignKeyForRelationship = options.foreignKeyForRelationship ? () => options.foreignKeyForRelationship : adapter.foreignKeyForRelationship;
+
+  mapping.join.through.from = `${joinTable}.${foreignKeyForRelationship.call(adapter, model)}`; // i.e. from: 'Post_Tag.postId'
+  mapping.join.through.to = `${joinTable}.${foreignKeyForRelationship.call(adapter, RelatedObjectionModel.denaliModel)}`; // i.e. from: 'Post_Tag.postId'
 
   return mapping;
 }

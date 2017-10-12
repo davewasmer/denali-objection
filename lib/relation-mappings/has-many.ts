@@ -6,8 +6,10 @@ import { Container, RelationshipDescriptor } from 'denali';
 import ExtendedDenaliModel from '../denali-model';
 import ExtendedObjectionModel from '../objection-model';
 import { RelationMapping, RelationJoin } from 'objection';
+import ObjectionAdapter from '../adapter';
 
 export default function generateHasManyRelationMapping(
+  adapter: ObjectionAdapter,
   objectionModels: Dict<typeof ExtendedObjectionModel>,
   container: Container,
   model: typeof ExtendedDenaliModel,
