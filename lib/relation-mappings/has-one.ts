@@ -16,18 +16,20 @@ export default function generateHasOneRelationMapping(
   descriptor: RelationshipDescriptor
 ): RelationMapping {
   let type = model.getType(container);
-
+  let options = descriptor.options;
   let ObjectionModel = objectionModels[type];
   let RelatedObjectionModel = objectionModels[descriptor.type];
 
   assert(ObjectionModel, `Unable to find the corresponding Objection model for the Denali "${ type }" model`);
   assert(RelatedObjectionModel, `Unable to find the corresponding Objection model for the Denali "${ descriptor.type }" model`);
 
+  let foreignKeyForRelationship = options.foreignKeyForRelationship ? () => options.foreignKeyForRelationship : adapter.foreignKeyForRelationship;
+
   let mapping = {
     relation: BaseObjectionModel.BelongsToOneRelation,
     modelClass: RelatedObjectionModel,
     join: <RelationJoin>{
-      from: `${ ObjectionModel.tableName }.${ name }Id`, // i.e. from: 'Comment.postId'
+      from: `${ ObjectionModel.tableName }.${ foreignKeyForRelationship.call(adapter, descriptor) }`, // i.e. from: 'Comment.postId'
       to: `${ RelatedObjectionModel.tableName }.id` // i.e. to: 'Post.id'
     }
   };

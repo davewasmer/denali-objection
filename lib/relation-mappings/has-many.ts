@@ -18,7 +18,6 @@ export default function generateHasManyRelationMapping(
 ): RelationMapping {
   let options = descriptor.options;
   let type = model.getType(container);
-  let inverse = options.inverse || camelCase(type);
 
   let ObjectionModel = objectionModels[type];
   let RelatedObjectionModel = objectionModels[descriptor.type];
@@ -26,12 +25,14 @@ export default function generateHasManyRelationMapping(
   assert(ObjectionModel, `Unable to find the corresponding Objection model for the Denali "${ type }" model`);
   assert(RelatedObjectionModel, `Unable to find the corresponding Objection model for the Denali "${ descriptor.type }" model`);
 
+  let foreignKeyForRelationship = options.foreignKeyForRelationship ? () => options.foreignKeyForRelationship : adapter.foreignKeyForRelationship;
+
   let mapping = {
     relation: BaseObjectionModel.HasManyRelation,
     modelClass: RelatedObjectionModel,
     join: <RelationJoin>{
       from: `${ ObjectionModel.tableName }.id`, // i.e. from: 'Post.id'
-      to: `${ RelatedObjectionModel.tableName }.${ inverse }_id` // i.e. to: 'Comment.postId'
+      to: `${ RelatedObjectionModel.tableName }.${ foreignKeyForRelationship.call(adapter, descriptor) }` // i.e. to: 'Comment.postId'
     }
   };
 

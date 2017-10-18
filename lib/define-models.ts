@@ -39,7 +39,7 @@ export default function defineModels(adapter: ObjectionAdapter, container: Conta
 
     // Give it a sensible name
     Object.defineProperty(ObjectionModel, 'name', {
-      value: `${ startCase(model.getType(container)).replace(' ', '') }ObjectionModel`
+      value: `${ startCase(model.getType(container)).replace(/\s/g, '') }ObjectionModel`
     });
 
     objectionModels[type] = ObjectionModel;
