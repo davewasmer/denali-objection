@@ -15,7 +15,7 @@
   "types": "dist/lib/index.d.ts",
   "license": "MIT",
   "dependencies": {
-    "@types/knex": "^0.0.57",
+    "@types/knex": "^0.0.67",
     "bluebird": "^3.4.6",
     "denali": "^0.0.37",
     "denali-cli": "^0.0.17",

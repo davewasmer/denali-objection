@@ -118,6 +118,10 @@
   dependencies:
     "@types/node" "*"
 
+"@types/events@*":
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/@types/events/-/events-1.1.0.tgz#93b1be91f63c184450385272c47b6496fd028e02"
+
 "@types/express-serve-static-core@*":
   version "4.0.40"
   resolved "https://registry.yarnpkg.com/@types/express-serve-static-core/-/express-serve-static-core-4.0.40.tgz#168e82978bffc81ee7737bc60728d64733a4f37b"
@@ -180,11 +184,12 @@
   version "1.5.28"
   resolved "https://registry.yarnpkg.com/@types/inflection/-/inflection-1.5.28.tgz#43d55e0d72cf333a2dffd9c4ec0407455a1b0931"
 
-"@types/knex@^0.0.57":
-  version "0.0.57"
-  resolved "https://registry.yarnpkg.com/@types/knex/-/knex-0.0.57.tgz#fb4440494c585109e44507606724f16289480fa2"
+"@types/knex@^0.0.67":
+  version "0.0.67"
+  resolved "https://registry.yarnpkg.com/@types/knex/-/knex-0.0.67.tgz#c7703153bc3e7b00fda6c9cfb42d7f29f7a33693"
   dependencies:
     "@types/bluebird" "*"
+    "@types/events" "*"
     "@types/node" "*"
 
 "@types/lodash@^4.14.64", "@types/lodash@^4.14.74", "@types/lodash@^4.14.76":
