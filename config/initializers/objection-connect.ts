@@ -8,7 +8,7 @@ export default {
   async initialize(application: Application) {
     assert(application.config.database && application.config.database.client, 'Looks like you are missing database configuration. Add it to config.database - see the knex docs for configuration details: http://knexjs.org/#Installation-client');
     application.container.register('objection:knex', knex(application.config.database), {
-      singleton: false,
+      singleton: true,
       instantiate: false
     });
   }
