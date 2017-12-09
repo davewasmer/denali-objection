@@ -20,7 +20,7 @@
     "denali": "^0.0.37",
     "denali-cli": "^0.0.17",
     "denali-typescript": "^0.0.8",
-    "knex": "^0.13.0",
+    "knex": "^0.14.2",
     "lodash": "^4.16.4",
     "objection": "^0.8.7",
     "standard-version": "^4.2.0",
