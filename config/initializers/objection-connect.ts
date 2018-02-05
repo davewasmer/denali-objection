@@ -1,15 +1,13 @@
 import * as assert from 'assert';
 import * as Knex from 'knex';
-import { Application } from 'denali';
+import { Application, container } from 'denali';
 
 export default {
   name: 'objection-connect',
   before: 'define-orm-models',
   async initialize(application: Application) {
-    assert(application.config.database && application.config.database.client, 'Looks like you are missing database configuration. Add it to config.database - see the knex docs for configuration details: http://knexjs.org/#Installation-client');
-    application.container.register('objection:knex', Knex(application.config.database), {
-      singleton: false,
-      instantiate: false
-    });
+    assert(application.config.get('database', 'client'), 'Looks like you are missing database configuration. Add it to config.database - see the knex docs for configuration details: http://knexjs.org/#Installation-client');
+    let config = application.config.get('database');
+    container.register('objection:knex', Knex(config), { singleton: false });
   }
 };

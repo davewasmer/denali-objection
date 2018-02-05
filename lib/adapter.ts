@@ -4,7 +4,7 @@ import {
   snakeCase
 } from 'lodash';
 import * as assert from 'assert';
-import { Model as DenaliModel, inject, ORMAdapter, RelationshipDescriptor } from 'denali';
+import { Model as DenaliModel, lookup, ORMAdapter, RelationshipDescriptor } from 'denali';
 import { transaction, Transaction } from 'objection';
 import * as knex from 'knex';
 import defineModels from './define-models';
@@ -31,7 +31,7 @@ export interface FilterQuery {
 export default class ObjectionAdapter extends ORMAdapter {
 
   objectionModels: Dict<typeof ExtendedObjectionModel> = {};
-  knex = inject<knex>('objection:knex');
+  knex = lookup<knex>('objection:knex');
   testTransaction: Transaction;
 
   async all(type: string) {
@@ -75,7 +75,7 @@ export default class ObjectionAdapter extends ORMAdapter {
       return model.record.$id();
     }
     let ModelClass = <typeof ExtendedDenaliModel>model.constructor;
-    let type = ModelClass.getType(this.container);
+    let type = ModelClass.modelName;
     let ObjectionModel = this.objectionModels[type];
     let idColumn = ObjectionModel.idColumn;
     if (typeof idColumn === 'string') {
@@ -135,12 +135,12 @@ export default class ObjectionAdapter extends ORMAdapter {
   }
 
   async removeRelated(model: ExtendedDenaliModel, relationship: string, descriptor: RelationshipDescriptor, relatedModel: ExtendedDenaliModel) {
-    let ORMModel = this.objectionModelForType(model.type);
+    let ORMModel = this.objectionModelForType(model.modelName);
     return model.record.$relatedQuery(relationship, this.testTransaction).unrelate().where(ORMModel.idColumn, relatedModel.id);
   }
 
   async saveRecord(model: ExtendedDenaliModel) {
-    let AdapterObjectionModel = this.objectionModelForType(model.type);
+    let AdapterObjectionModel = this.objectionModelForType(model.modelName);
     if (typeof model.record.$id === 'function') {
       await AdapterObjectionModel.query().patchAndFetchById(model.record.$id(), model.record);
       return;
@@ -150,7 +150,7 @@ export default class ObjectionAdapter extends ORMAdapter {
   }
 
   async deleteRecord(model: ExtendedDenaliModel) {
-    let ORMModel = this.objectionModelForType(model.type);
+    let ORMModel = this.objectionModelForType(model.modelName);
     if (Array.isArray(ORMModel.idColumn)) {
       throw new Error('Compound ids are not yet supported by the denali-objection adapter');
     }
@@ -179,14 +179,14 @@ export default class ObjectionAdapter extends ORMAdapter {
     return AdapterObjectionModel;
   }
 
-  serializeRecord(json: object) {
-    return mapKeys<any, string>(json, (value, key) => {
+  serializeRecord(json: object): Dict<any> {
+    return mapKeys(json, (value, key) => {
       return this.serializeColumn(key);
     });
   }
 
-  parseRecord(json: object) {
-    return mapKeys<any, string>(json, (value, key) => {
+  parseRecord(json: object): Dict<any> {
+    return mapKeys(json, (value, key) => {
       return this.parseColumn(key);
     });
   }
@@ -200,7 +200,7 @@ export default class ObjectionAdapter extends ORMAdapter {
   }
 
   async defineModels(models: (typeof ExtendedDenaliModel | typeof DenaliModel)[]) {
-    defineModels(this, this.container, models);
+    defineModels(this, models);
   }
 
 }

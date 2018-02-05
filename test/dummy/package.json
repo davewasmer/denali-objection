@@ -3,8 +3,7 @@
   "version": "0.0.0",
   "dependencies": {
     "denali": "*",
-    "denali-babel": "*",
-    "denali-eslint": "*",
+    "denali-typescript": "*",
     "denali-objection": "*"
   }
 }

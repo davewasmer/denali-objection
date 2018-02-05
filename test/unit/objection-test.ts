@@ -1,8 +1,7 @@
-import test, { TestContext, Context } from 'ava';
 import * as Knex from 'knex';
-import { Container } from 'denali';
+import { setupUnitTest } from 'denali';
 import { ObjectionAdapter } from 'denali-objection';
-import testAdapter from 'denali-adapter-test-suite';
+import runAdapterTests from 'denali-adapter-test-suite';
 import * as tmp from 'tmp';
 
 // Connect to the database
@@ -14,33 +13,33 @@ let knex = Knex({
   }
 });
 
+const test = setupUnitTest(() => new ObjectionAdapter(), {
+  'model:post': true,
+  'model:comment': true
+});
 
-// Run migrations to get the schema the test suite needs
 test.before(async () => {
   let { schema } = knex;
-
-  // Posts
   await schema.dropTableIfExists('posts');
+  await schema.dropTableIfExists('comments');
+  // Posts
   await schema.createTableIfNotExists('posts', (posts) => {
     posts.increments('id');
     posts.text('title');
   });
-
   // Comments
-  await schema.dropTableIfExists('comments');
   await schema.createTableIfNotExists('comments', (comments) => {
     comments.increments('id');
     comments.text('body');
     comments.integer('post_id').references('post.id');
   });
-
 });
 
-// Run every test inside a transaction
-test.beforeEach(async (t) => {
+test.beforeEach((t: any) => {
   return new Promise((resolve) => {
     t.context.transaction = knex.transaction((trx) => {
       t.context.transactionClient = trx;
+      t.context.inject('objection:knex', trx, { singleton: false });
       resolve();
     }).catch((reason) => {
       if (reason !== 'finished') {
@@ -50,13 +49,8 @@ test.beforeEach(async (t) => {
   });
 });
 
-// Rollback test transactions when the test finishes
-test.afterEach.always(async (t) => {
-  // if (!t.context.transaction.isCompleted()) {
-    await t.context.transactionClient.rollback('finished');
-  // }
+test.afterEach.always(async (t: any) => {
+  await t.context.transactionClient.rollback('finished');
 });
 
-testAdapter(test, ObjectionAdapter, async (t: TestContext & Context<any>, container: Container) => {
-  container.register('objection:knex', t.context.transactionClient);
-});
+runAdapterTests(test, ObjectionAdapter);

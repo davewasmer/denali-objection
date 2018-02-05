@@ -4,24 +4,23 @@ import { camelCase } from 'lodash';
 import { Model as BaseObjectionModel } from 'objection';
 import ExtendedDenaliModel from '../denali-model';
 import ExtendedObjectionModel from '../objection-model';
-import { RelationshipDescriptor, Container } from 'denali';
+import { RelationshipDescriptor } from 'denali';
 import { RelationMapping, RelationJoin, RelationThrough } from 'objection';
 
 export default function generateManyToManyRelationMapping(
   objectionModels: Dict<typeof ExtendedObjectionModel>,
-  container: Container,
   model: typeof ExtendedDenaliModel,
   name: string,
   descriptor: RelationshipDescriptor
 ): RelationMapping {
-  let type = model.getType(container);
+  let type = model.modelName;
   let options = descriptor.options;
   let ObjectionModel = objectionModels[type];
-  let RelatedObjectionModel = objectionModels[descriptor.type];
-  let relatedType = RelatedObjectionModel.denaliModel.getType(container);
+  let RelatedObjectionModel = objectionModels[descriptor.relatedModelName];
+  let relatedType = RelatedObjectionModel.denaliModel.modelName;
 
   assert(ObjectionModel, `Unable to find the corresponding Objection model for the Denali "${ type }" model`);
-  assert(RelatedObjectionModel, `Unable to find the corresponding Objection model for the Denali "${ descriptor.type }" model`);
+  assert(RelatedObjectionModel, `Unable to find the corresponding Objection model for the Denali "${ descriptor.relatedModelName }" model`);
 
   let mapping = {
     relation: BaseObjectionModel.ManyToManyRelation,
