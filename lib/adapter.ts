@@ -200,7 +200,7 @@ export default class ObjectionAdapter extends ORMAdapter {
   }
 
   async defineModels(models: (typeof ExtendedDenaliModel | typeof DenaliModel)[]) {
-    defineModels(this, models);
+    await defineModels(this, models);
   }
 
 }

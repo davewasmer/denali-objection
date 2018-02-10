@@ -14,7 +14,7 @@ import generateHasManyRelationMapping from './relation-mappings/has-many';
 import generateHasOneRelationMapping from './relation-mappings/has-one';
 
 
-export default function defineModels(adapter: ObjectionAdapter, Models: (typeof ExtendedDenaliModel | typeof BaseDenaliModel)[]) {
+export default async function defineModels(adapter: ObjectionAdapter, Models: (typeof ExtendedDenaliModel | typeof BaseDenaliModel)[]) {
   let objectionModels = adapter.objectionModels;
 
   Models.forEach((Model) => {
