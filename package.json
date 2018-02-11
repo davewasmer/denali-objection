@@ -21,9 +21,9 @@
   "dependencies": {
     "@types/knex": "^0.0.57",
     "bluebird": "^3.4.6",
-    "denali": "^0.0.43",
+    "denali": "^0.0.44",
     "denali-cli": "^0.0.24",
-    "denali-typescript": "^0.0.x",
+    "denali-typescript": "^0.0.10",
     "knex": "^0.13.0",
     "lodash": "^4.16.4",
     "objection": "^0.8.7",
@@ -32,7 +32,7 @@
   "devDependencies": {
     "@types/tmp": "^0.0.33",
     "ava": "^0.22.0",
-    "denali-adapter-test-suite": "0.x.x",
+    "denali-adapter-test-suite": "0.1.1",
     "pg": "^7.2.0",
     "sqlite3": "^3.1.9",
     "standard-version": "^4.2.0",
