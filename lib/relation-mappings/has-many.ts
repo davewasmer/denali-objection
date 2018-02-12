@@ -27,7 +27,7 @@ export default function generateHasManyRelationMapping(
     relation: BaseObjectionModel.HasManyRelation,
     modelClass: RelatedObjectionModel,
     join: <RelationJoin>{
-      from: `${ ObjectionModel.tableName }.id`, // i.e. from: 'Post.id'
+      from: `${ ObjectionModel.tableName }.${ ObjectionModel.idColumn }`, // i.e. from: 'Post.id'
       to: `${ RelatedObjectionModel.tableName }.${ inverse }_id` // i.e. to: 'Comment.postId'
     }
   };

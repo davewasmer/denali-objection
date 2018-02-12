@@ -26,8 +26,8 @@ export default function generateManyToManyRelationMapping(
     relation: BaseObjectionModel.ManyToManyRelation,
     modelClass: RelatedObjectionModel,
     join: <RelationJoin>{
-      from: `${ ObjectionModel.tableName }.id`, // i.e. from: 'Post.id'
-      to: `${ RelatedObjectionModel.tableName }.id`, // i.e. to: 'Tag.id'
+      from: `${ ObjectionModel.tableName }.${ ObjectionModel.idColumn }`, // i.e. from: 'Post.id'
+      to: `${ RelatedObjectionModel.tableName }.${ ObjectionModel.idColumn }`, // i.e. to: 'Tag.id'
       through: <RelationThrough>{
         extra: options.manyToMany.extra
       }
@@ -42,8 +42,8 @@ export default function generateManyToManyRelationMapping(
     joinTable = `${ ObjectionModel.tableName }_${ RelatedObjectionModel.tableName }`;
   }
 
-  mapping.join.through.from = `${ joinTable }.${ camelCase(type) }Id`; // i.e. from: 'Post_Tag.postId'
-  mapping.join.through.to = `${ joinTable }.${ camelCase(relatedType) }Id`; // i.e. from: 'Post_Tag.tagId'
+  mapping.join.through.from = `${ joinTable }.${ camelCase(type) }_id`; // i.e. from: 'Post_Tag.postId'
+  mapping.join.through.to = `${ joinTable }.${ camelCase(relatedType) }_id`; // i.e. from: 'Post_Tag.tagId'
 
   return mapping;
 }

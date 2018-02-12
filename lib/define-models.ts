@@ -23,6 +23,7 @@ export default async function defineModels(adapter: ObjectionAdapter, Models: (t
     class ObjectionModel extends ExtendedObjectionModel {
 
       static tableName = (<typeof ExtendedDenaliModel>Model).tableName || pluralize(snakeCase(type));
+      static idColumn = (<typeof ExtendedDenaliModel>Model).idColumn || 'id';
       static denaliModel = <typeof ExtendedDenaliModel>Model;
 
       $formatDatabaseJson(json: Object) {

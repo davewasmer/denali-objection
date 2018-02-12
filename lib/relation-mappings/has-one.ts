@@ -24,8 +24,8 @@ export default function generateHasOneRelationMapping(
     relation: BaseObjectionModel.BelongsToOneRelation,
     modelClass: RelatedObjectionModel,
     join: <RelationJoin>{
-      from: `${ ObjectionModel.tableName }.${ name }Id`, // i.e. from: 'Comment.postId'
-      to: `${ RelatedObjectionModel.tableName }.id` // i.e. to: 'Post.id'
+      from: `${ ObjectionModel.tableName }.${ name }_id`, // i.e. from: 'Comment.postId'
+      to: `${ RelatedObjectionModel.tableName }.${ RelatedObjectionModel.idColumn }` // i.e. to: 'Post.id'
     }
   };
 
