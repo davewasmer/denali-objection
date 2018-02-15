@@ -1,6 +1,6 @@
 {
   "name": "denali-objection",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "scripts": {
     "build": "denali build",
     "prepublishOnly": "npm run build",
@@ -21,9 +21,9 @@
   "dependencies": {
     "@types/knex": "^0.0.57",
     "bluebird": "^3.4.6",
-    "denali": "^0.0.44",
-    "denali-cli": "^0.0.24",
-    "denali-typescript": "^0.0.10",
+    "denali": "^0.0.46",
+    "denali-cli": "^0.0.27",
+    "denali-typescript": "^0.0.11",
     "knex": "^0.13.0",
     "lodash": "^4.16.4",
     "objection": "^0.8.7",
