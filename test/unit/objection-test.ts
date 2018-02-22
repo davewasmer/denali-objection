@@ -1,7 +1,7 @@
 import * as Knex from 'knex';
-import { setupUnitTest } from 'denali';
+import { setupUnitTest } from '@denali-js/core';
 import { ObjectionAdapter } from 'denali-objection';
-import runAdapterTests from 'denali-adapter-test-suite';
+import runAdapterTests from '@denali-js/orm-adapter-tests';
 import * as tmp from 'tmp';
 
 // Connect to the database

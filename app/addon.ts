@@ -1,4 +1,4 @@
-import { container, Addon } from 'denali';
+import { container, Addon } from '@denali-js/core';
 import * as knex from 'knex';
 
 export default class DenaliObjectionAddon extends Addon {

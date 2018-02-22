@@ -1,7 +1,7 @@
 import * as assert from 'assert';
 import { Dict } from '../utils';
 import { Model as BaseObjectionModel } from 'objection';
-import { RelationshipDescriptor } from 'denali';
+import { RelationshipDescriptor } from '@denali-js/core';
 import ExtendedDenaliModel from '../denali-model';
 import ExtendedObjectionModel from '../objection-model';
 import { RelationMapping, RelationJoin } from 'objection';

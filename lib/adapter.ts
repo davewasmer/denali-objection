@@ -4,7 +4,7 @@ import {
   snakeCase
 } from 'lodash';
 import * as assert from 'assert';
-import { Model as DenaliModel, lookup, ORMAdapter, RelationshipDescriptor } from 'denali';
+import { Model as DenaliModel, lookup, ORMAdapter, RelationshipDescriptor } from '@denali-js/core';
 import { transaction, Transaction } from 'objection';
 import * as knex from 'knex';
 import defineModels from './define-models';

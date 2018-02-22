@@ -1,6 +1,6 @@
 import * as assert from 'assert';
 import * as Knex from 'knex';
-import { Application, container } from 'denali';
+import { Application, container } from '@denali-js/core';
 
 export default {
   name: 'objection-connect',

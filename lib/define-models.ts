@@ -4,7 +4,7 @@ import {
   mapValues
 } from 'lodash';
 import { pluralize } from 'inflection';
-import { Model as BaseDenaliModel } from 'denali';
+import { Model as BaseDenaliModel } from '@denali-js/core';
 import ObjectionAdapter from './adapter';
 import ExtendedDenaliModel from './denali-model';
 import ExtendedObjectionModel from './objection-model';

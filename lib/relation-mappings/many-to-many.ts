@@ -4,7 +4,7 @@ import { camelCase } from 'lodash';
 import { Model as BaseObjectionModel } from 'objection';
 import ExtendedDenaliModel from '../denali-model';
 import ExtendedObjectionModel from '../objection-model';
-import { RelationshipDescriptor } from 'denali';
+import { RelationshipDescriptor } from '@denali-js/core';
 import { RelationMapping, RelationJoin, RelationThrough } from 'objection';
 
 export default function generateManyToManyRelationMapping(

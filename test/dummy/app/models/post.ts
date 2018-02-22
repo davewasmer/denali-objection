@@ -1,4 +1,4 @@
-import { Model, attr, hasMany } from 'denali';
+import { Model, attr, hasMany } from '@denali-js/core';
 
 export default class Post extends Model {
 
